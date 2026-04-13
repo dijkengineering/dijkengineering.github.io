@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23f5a623'/><text y='72' x='50' text-anchor='middle' font-size='60' font-family='monospace' fill='%23000'>P1</text></svg>">
+  <title>P1 Meter — Dijk Engineering</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --solar-yellow: #f5a623;
+      --bg:           #0f1117;
+      --card-bg:      #1a1d27;
+      --card-border:  #2a2d3e;
+      --text-muted:   #a0a4bc;
+      --label-color:  #c8ccde;
+    }
+
+    body {
+      background: var(--bg);
+      color: #e0e3f0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: var(--card-bg) !important;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .version-badge {
+      background: rgba(245,166,35,.15);
+      border: 1px solid rgba(245,166,35,.3);
+      color: var(--solar-yellow);
+      font-size: .7rem;
+      padding: .15rem .5rem;
+      border-radius: 20px;
+      font-family: monospace;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+    }
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--card-border);
+      font-weight: 600;
+      letter-spacing: .03em;
+      color: #e0e3f0;
+    }
+
+    /* ── FEATURE CARDS ── */
+    .feat-card {
+      transition: transform .15s, border-color .2s;
+    }
+    .feat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(245,166,35,.4) !important;
+    }
+    .feat-icon {
+      width: 40px; height: 40px;
+      background: rgba(245,166,35,.1);
+      border: 1px solid rgba(245,166,35,.25);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: .9rem;
+    }
+
+    /* ── LINKS ── */
+    .link-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      text-decoration: none;
+      color: #e0e3f0;
+      transition: border-color .2s, transform .15s;
+    }
+    .link-card:hover {
+      border-color: rgba(245,166,35,.4);
+      transform: translateY(-2px);
+      color: #e0e3f0;
+    }
+    .link-card .lc-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .link-card strong   { display: block; font-size: .92rem; font-weight: 600; color: #e0e3f0; }
+    .link-card span     { font-size: .78rem; color: var(--text-muted); }
+
+    /* ── MISC ── */
+    .btn-solar { background: var(--solar-yellow); color: #000; font-weight: 600; border: none; }
+    .btn-solar:hover { background: #e8961a; color: #000; }
+    .btn-outline-solar { border: 1px solid var(--solar-yellow); color: var(--solar-yellow); background: transparent; }
+    .btn-outline-solar:hover { background: rgba(245,166,35,.1); color: var(--solar-yellow); }
+
+    .info-box {
+      background: rgba(74,144,217,.08);
+      border: 1px solid rgba(74,144,217,.2);
+      border-radius: 8px;
+    }
+    .warn-box {
+      background: rgba(245,166,35,.08);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: 8px;
+    }
+
+    footer {
+      border-top: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: .8rem;
+    }
+    footer a { color: var(--solar-yellow); text-decoration: none; }
+    footer a:hover { opacity: .75; }
+
+    .text-muted { color: var(--text-muted) !important; }
+    .form-label { color: var(--label-color) !important; font-size: .85rem; font-weight: 500; }
+
+    /* hero pulse dot */
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #27ae60;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.4; transform:scale(.7); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark px-3 py-2 mb-4">
+  <span class="navbar-brand fw-bold">
+    <i class="bi bi-broadcast text-warning me-2"></i>P1 Meter
+    <span class="version-badge ms-2">ESP32 · Arduino</span>
+  </span>
+  <div class="d-flex align-items-center gap-2">
+    <a href="https://github.com/dijkengineering/p1-meter" target="_blank"
+       class="btn btn-outline-solar btn-sm px-3">
+      <i class="bi bi-github me-1"></i>GitHub
+    </a>
+  </div>
+</nav>
+
+<div class="container-fluid px-3 px-md-4" style="max-width:960px">
+
+  <!-- Hero -->
+  <div class="card mb-4 p-4">
+    <div class="row align-items-center g-4">
+      <div class="col-md-8">
+        <div class="mb-2">
+          <span class="live-dot me-2"></span>
+          <span class="small" style="color:var(--label-color)">ESP32 · Arduino · Wi-Fi · DSMR 4 & 5</span>
+        </div>
+        <h1 class="fw-bold mb-2" style="font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.02em;color:#e0e3f0">
+          P1 Meter Dongle
+        </h1>
+        <p style="color:var(--text-muted);line-height:1.65;max-width:480px" class="mb-0">
+          Een ESP32-gebaseerde P1-dongle met Arduino-firmware die je slimme meter uitleest via Wi-Fi.
+          Optioneel te koppelen aan <a href="https://www.home-assistant.io" target="_blank" style="color:var(--solar-yellow);text-decoration:none">Home Assistant</a>
+          via MQTT. Compatibel met alle gangbare Nederlandse en Belgische slimme meters (DSMR 4 & 5).
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end text-start">
+        <div class="d-flex flex-column gap-2 align-items-md-end align-items-start">
+          <a href="https://dijkengineering.nl" target="_blank" class="btn btn-solar btn-sm px-4">
+            <i class="bi bi-cart me-1"></i>Dongle bestellen
+          </a>
+          <a href="https://github.com/dijkengineering/p1-meter" target="_blank"
+             class="btn btn-outline-solar btn-sm px-4">
+            <i class="bi bi-book me-1"></i>Documentatie
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aan de slag -->
+  <div class="card mb-4 p-4">
+    <div class="card-header mb-3 px-0 pt-0">
+      <i class="bi bi-box-seam text-warning me-1"></i>Pre-geflasht geleverd
+    </div>
+    <p style="color:var(--text-muted);font-size:.9rem" class="mb-3">
+      De dongle wordt <strong style="color:#e0e3f0">kant-en-klaar geflasht</strong> geleverd —
+      geen Arduino IDE of extra tools nodig. Sluit hem aan op de P1-poort van je slimme meter,
+      verbind met je Wi-Fi en hij is direct klaar voor gebruik.
+    </p>
+    <div class="row g-3">
+      <div class="col-sm-4">
+        <div class="info-box p-3 text-center">
+          <div class="fw-bold mb-1" style="color:#e0e3f0"><i class="bi bi-1-circle-fill text-warning me-1"></i>Aansluiten</div>
+          <div class="small" style="color:var(--text-muted)">Steek de dongle in de P1-poort van je slimme meter</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="info-box p-3 text-center">
+          <div class="fw-bold mb-1" style="color:#e0e3f0"><i class="bi bi-2-circle-fill text-warning me-1"></i>Wi-Fi instellen</div>
+          <div class="small" style="color:var(--text-muted)">Verbind met het access point van de dongle en vul je Wi-Fi gegevens in</div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="info-box p-3 text-center">
+          <div class="fw-bold mb-1" style="color:#e0e3f0"><i class="bi bi-3-circle-fill text-warning me-1"></i>Klaar voor gebruik</div>
+          <div class="small" style="color:var(--text-muted)">Uitlezen via de webinterface of koppel optioneel met Home Assistant via MQTT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <h6 class="mb-3 fw-semibold" style="color:var(--label-color);letter-spacing:.04em;font-size:.8rem;text-transform:uppercase">
+    Wat het doet
+  </h6>
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-lightning-charge-fill text-warning"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">Real-time verbruik</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Actueel stroom- en gasverbruik uitlezen via de ingebouwde webinterface of via MQTT.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-sun-fill text-warning"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">Teruglevering</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Meet ook wat je zonnepanelen terugleveren aan het net.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-wifi text-info"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">Wi-Fi verbinding</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Eenvoudig configureren via het eigen access point. Daarna draadloos bereikbaar in je netwerk.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-plug-fill" style="color:#4a90d9"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">DSMR 4 & 5</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Compatibel met alle gangbare Nederlandse en Belgische slimme meters.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-house-fill text-success"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">Home Assistant via MQTT</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Optioneel te koppelen aan Home Assistant via MQTT. Alle meetwaarden verschijnen automatisch als sensoren.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card feat-card p-3 h-100">
+        <div class="feat-icon"><i class="bi bi-github" style="color:#e0e3f0"></i></div>
+        <h6 class="fw-semibold mb-1" style="color:#e0e3f0">Open source</h6>
+        <p class="small mb-0" style="color:var(--text-muted)">
+          Volledige Arduino-broncode op GitHub. Vrij te gebruiken en aan te passen.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MQTT tip -->
+  <div class="warn-box p-3 mb-4 small" style="color:var(--label-color)">
+    <i class="bi bi-info-circle me-1 text-warning"></i>
+    <strong style="color:#e0e3f0">Home Assistant koppelen via MQTT?</strong>
+    Stel in de webinterface van de dongle je MQTT broker-adres in.
+    De meetwaarden worden daarna automatisch gepubliceerd en verschijnen als sensoren in Home Assistant.
+  </div>
+
+  <!-- Links -->
+  <h6 class="mb-3 fw-semibold" style="color:var(--label-color);letter-spacing:.04em;font-size:.8rem;text-transform:uppercase">
+    Meer informatie
+  </h6>
+  <div class="row g-3 mb-5">
+    <div class="col-sm-4">
+      <a class="link-card h-100" href="https://github.com/dijkengineering/p1-meter" target="_blank">
+        <span class="lc-icon">📄</span>
+        <div>
+          <strong>Documentatie</strong>
+          <span>Bedrading, configuratie & MQTT</span>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-4">
+      <a class="link-card h-100" href="https://dijkengineering.nl" target="_blank">
+        <span class="lc-icon">🛒</span>
+        <div>
+          <strong>Dijk Engineering</strong>
+          <span>Voorgebouwde dongle bestellen</span>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-4">
+      <a class="link-card h-100" href="https://www.home-assistant.io" target="_blank">
+        <span class="lc-icon">🏠</span>
+        <div>
+          <strong>Home Assistant</strong>
+          <span>homeassistant.io</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Buy Me a Coffee -->
+  <div class="text-center mb-5 pb-2" style="border-top:1px solid var(--card-border);padding-top:2.5rem">
+    <p class="small mb-3" style="color:var(--text-muted)">Vind je dit project nuttig? Een koffietje is altijd welkom 😊</p>
+    <a href="https://www.buymeacoffee.com/dijkengineering" target="_blank">
+      <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
+           alt="Buy Me A Coffee"
+           style="height:41px;width:174px;box-shadow:0 3px 2px rgba(190,190,190,.5);">
+    </a>
+  </div>
+
+</div><!-- /container -->
+
+<footer class="py-3 text-center">
+  Powered by <a href="https://www.dijkengineering.nl" target="_blank"><strong>Dijk Engineering</strong></a>
+</footer>
+</body>
+</html>
